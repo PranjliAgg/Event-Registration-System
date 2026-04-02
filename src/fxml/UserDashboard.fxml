@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.eventregistration.controller.UserDashboardController"
+            styleClass="root-pane">
+
+    <top>
+        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="16">
+            <Label text=" EventHub" styleClass="nav-brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="welcomeLabel" styleClass="nav-welcome"/>
+            <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-outline"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="btn-danger"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="16" styleClass="tab-content">
+                <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+                <VBox spacing="12" styleClass="filter-section">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextField fx:id="searchField" promptText="Search events..." styleClass="form-field" prefWidth="240"/>
+                        <ComboBox fx:id="filterCategoryCombo" promptText="Category" prefWidth="140"/>
+                        <ComboBox fx:id="filterVenueCombo" promptText="Venue" prefWidth="140"/>
+                        <Button text="Search" onAction="#handleSearch" styleClass="btn-secondary-modern"/>
+                        <Button text="Reset" onAction="#clearFilters" styleClass="btn-outline"/>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Payment Mode:" styleClass="form-label"/>
+                        <ComboBox fx:id="payModeCombo" prefWidth="120"/>
+                        <Button text="Register Selected" onAction="#handleRegister" styleClass="btn-primary-modern"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="My Registrations" onAction="#handleNavMyRegistrations" styleClass="btn-secondary-modern"/>
+                    </HBox>
+                </VBox>
+
+                <Label text="Available Events" styleClass="section-heading"/>
+                <FlowPane fx:id="eventsFlowPane" hgap="12" vgap="12" prefWrapLength="1000"/>
+
+                <Label fx:id="statusLabel" styleClass="status-label" visible="false"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

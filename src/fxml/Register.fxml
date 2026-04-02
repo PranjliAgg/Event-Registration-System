@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.eventregistration.controller.RegisterController"
+           styleClass="root-pane">
+
+    <VBox alignment="CENTER" spacing="20" styleClass="register-container">
+
+        <!-- Header -->
+        <VBox alignment="CENTER" spacing="8" styleClass="register-header">
+            <Label text="&#x1F4C5; EventHub" styleClass="app-title"/>
+            <Label text="Register New Account" styleClass="register-title"/>
+            <Label text="Create an account to book events" styleClass="register-subtitle"/>
+        </VBox>
+
+        <!-- Registration Form Card -->
+        <VBox spacing="0" styleClass="register-card">
+            <GridPane hgap="15" vgap="12" styleClass="register-form">
+                <Label text="Full Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                <TextField fx:id="nameField" promptText="Enter your full name" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="form-field" prefWidth="250"/>
+
+                <Label text="Email Address:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                <TextField fx:id="emailField" promptText="you@college.edu" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="form-field"/>
+
+                <Label text="Phone Number:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label"/>
+                <TextField fx:id="phoneField" promptText="9999999999" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="form-field"/>
+
+                <Label text="Password:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="form-label"/>
+                <PasswordField fx:id="passwordField" promptText="••••••••" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="form-field"/>
+
+                <Label text="Confirm Password:" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="form-label"/>
+                <PasswordField fx:id="confirmPasswordField" promptText="••••••••" GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="form-field"/>
+            </GridPane>
+
+            <VBox spacing="10" styleClass="form-actions">
+                <Label fx:id="statusLabel" styleClass="error-label" visible="false" wrapText="true"/>
+                <Button fx:id="registerBtn" text="Create Account" onAction="#handleRegister" styleClass="btn-primary-modern"/>
+                <Button text="Back to Login" onAction="#handleBackToLogin" styleClass="btn-secondary-modern"/>
+            </VBox>
+        </VBox>
+
+        <!-- Footer Hint -->
+        <Label text="Already have an account? Click Back to Login" styleClass="footer-hint"/>
+    </VBox>
+</StackPane>
+

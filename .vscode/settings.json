@@ -1,0 +1,8 @@
+{
+  "java.project.referencedLibraries": [
+    "lib/*.jar"
+  ],
+  "chat.tools.terminal.autoApprove": {
+    "java": true
+  }
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.eventregistration.controller.AdminDashboardController"
+            styleClass="root-pane">
+
+    <top>
+        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="16">
+            <Label text="📅 EventHub Admin - Create Event" styleClass="nav-brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Back" onAction="#handleBackToMain" styleClass="btn-outline"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="btn-danger"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="tab-content">
+                <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+                <Label text="Create New Event" styleClass="section-heading"/>
+
+                <GridPane hgap="12" vgap="12" styleClass="form-section">
+                    <Label text="Event Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="eventNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="form-field" prefWidth="300"/>
+                    <Label text="Description:" GridPane.rowIndex="0" GridPane.columnIndex="2" styleClass="form-label"/>
+                    <TextField fx:id="descField" GridPane.rowIndex="0" GridPane.columnIndex="3" styleClass="form-field" prefWidth="300"/>
+
+                    <Label text="Event Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <DatePicker fx:id="eventDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="form-field"/>
+                    <Label text="Registration Deadline:" GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="form-label"/>
+                    <DatePicker fx:id="deadlinePicker" GridPane.rowIndex="1" GridPane.columnIndex="3" styleClass="form-field"/>
+
+                    <Label text="Total Seats:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="totalSeatsField" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="form-field" promptText="e.g. 100"/>
+                    <Label text="Price (₹):" GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="form-label"/>
+                    <TextField fx:id="priceField" GridPane.rowIndex="2" GridPane.columnIndex="3" styleClass="form-field" promptText="0 for free"/>
+
+                    <Label text="Category:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <ComboBox fx:id="categoryCombo" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="form-field" prefWidth="300"/>
+                    <Label text="Venue:" GridPane.rowIndex="3" GridPane.columnIndex="2" styleClass="form-label"/>
+                    <ComboBox fx:id="venueCombo" GridPane.rowIndex="3" GridPane.columnIndex="3" styleClass="form-field" prefWidth="300"/>
+                </GridPane>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="Create Event" onAction="#handleAddEvent" styleClass="btn-primary-modern"/>
+                    <Button text="Clear Form" onAction="#handleClearForm" styleClass="btn-secondary-modern"/>
+                </HBox>
+
+                <Label fx:id="statusLabel" styleClass="status-label" visible="false"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

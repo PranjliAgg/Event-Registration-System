@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.eventregistration.controller.AdminDashboardController"
+            styleClass="root-pane">
+
+    <top>
+        <HBox styleClass="top-nav" alignment="CENTER_LEFT" spacing="16">
+            <Label text="📅 EventHub Admin" styleClass="nav-brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Total Users:" styleClass="nav-welcome"/>
+            <Label fx:id="totalUsersLbl" styleClass="stat-badge"/>
+            <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-outline"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="btn-danger"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="18" styleClass="tab-content">
+                <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="Create Event" onAction="#handleNavCreateEvent" styleClass="btn-primary-modern"/>
+                    <Button text="View Registrations" onAction="#handleNavRegistrations" styleClass="btn-secondary-modern"/>
+                    <Button text="Revenue Report" onAction="#handleNavRevenueReport" styleClass="btn-secondary-modern"/>
+                </HBox>
+
+                <Label text="Active Events" styleClass="section-heading"/>
+                <FlowPane fx:id="adminEventsFlow" hgap="12" vgap="12" prefWrapLength="1000"/>
+
+                <Label fx:id="statusLabel" styleClass="status-label" visible="false"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
