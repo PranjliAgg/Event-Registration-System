@@ -4,7 +4,7 @@
 
 /* Root */
 .root-pane {
-    -fx-background-color: linear-gradient(to bottom, #e8eaf6, #ffffff);
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #e8eaf6 0%, #ffffff 100%);
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-font-size: 13px;
     -fx-padding: 12;
@@ -115,10 +115,10 @@
 .btn-secondary:hover { -fx-background-color: #37474f; }
 
 .btn-outline {
-    -fx-background-color: transparent;
+    -fx-background-color: #f7fafc;
     -fx-border-color: #c5cae9;
     -fx-border-radius: 8;
-    -fx-text-fill: #c5cae9;
+    -fx-text-fill: #2d3748;
     -fx-padding: 7 16;
     -fx-cursor: hand;
 }
@@ -176,12 +176,12 @@
 }
 .data-table .table-row-cell:odd { -fx-background-color: #fafafa; }
 .data-table .table-row-cell:selected { -fx-background-color: #c5cae9; }
-.data-table .table-row-cell:hover:!selected { -fx-background-color: #f3f4ff; }
+.data-table .table-row-cell:hover { -fx-background-color: #f3f4ff; }
 
 /* ── Registration Page ── */
 .register-container {
     -fx-padding: 30;
-    -fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #667eea 0%, #764ba2 100%);
     -fx-alignment: CENTER;
 }
 
@@ -254,7 +254,7 @@
 }
 
 .btn-primary-modern {
-    -fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #667eea 0%, #764ba2 100%);
     -fx-text-fill: white;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
@@ -268,18 +268,18 @@
 }
 
 .btn-primary-modern:hover {
-    -fx-background-color: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    -fx-background-color: linear-gradient(from 0% 100% to 100% 0%, #5a67d8 0%, #6b46c1 100%);
     -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.5), 8, 0, 0, 3);
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
 }
 
 .btn-secondary-modern {
-    -fx-background-color: transparent;
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #37474f 0%, #455a64 100%);
     -fx-border-color: #cbd5e0;
     -fx-border-width: 2;
     -fx-border-radius: 25;
-    -fx-text-fill: #718096;
+    -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-padding: 10 25;
     -fx-background-radius: 25;
@@ -289,9 +289,9 @@
 }
 
 .btn-secondary-modern:hover {
-    -fx-background-color: #f7fafc;
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #263238 0%, #37474f 100%);
     -fx-border-color: #a0aec0;
-    -fx-text-fill: #4a5568;
+    -fx-text-fill: #e2eaf0;
 }
 
 .footer-hint {
