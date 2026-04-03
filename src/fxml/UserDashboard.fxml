@@ -40,7 +40,7 @@
                 </VBox>
 
                 <Label text="Available Events" styleClass="section-heading"/>
-                <FlowPane fx:id="eventsFlowPane" hgap="12" vgap="12" prefWrapLength="1000"/>
+                <FlowPane fx:id="eventsFlowPane" hgap="16" vgap="16" prefWrapLength="1200"/>
 
                 <Label fx:id="statusLabel" styleClass="status-label" visible="false"/>
             </VBox>

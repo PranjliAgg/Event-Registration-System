@@ -21,7 +21,7 @@
             <VBox spacing="20" styleClass="tab-content">
                 <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
 
-                <Label text="Create New Event" styleClass="section-heading"/>
+                <Label fx:id="formTitleLabel" text="Create New Event" styleClass="section-heading"/>
 
                 <GridPane hgap="12" vgap="12" styleClass="form-section">
                     <Label text="Event Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
@@ -46,7 +46,7 @@
                 </GridPane>
 
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="Create Event" onAction="#handleAddEvent" styleClass="btn-primary-modern"/>
+                    <Button fx:id="actionButton" text="Create Event" onAction="#handleAddEvent" styleClass="btn-primary-modern"/>
                     <Button text="Clear Form" onAction="#handleClearForm" styleClass="btn-secondary-modern"/>
                 </HBox>
 

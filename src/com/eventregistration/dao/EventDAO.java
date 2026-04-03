@@ -198,6 +198,32 @@ public class EventDAO {
         }
     }
 
+    // ── Admin: Update entire event ────────────────────────────────
+    public boolean updateEvent(Event event) {
+        String sql = """
+            UPDATE EVENTS SET
+                event_name = ?, event_date = ?, total_seats = ?,
+                registration_deadline = ?, description = ?, price = ?,
+                category_id = ?, venue_id = ?
+            WHERE event_id = ?
+            """;
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, event.getEventName());
+            ps.setDate(2, Date.valueOf(event.getEventDate()));
+            ps.setInt(3, event.getTotalSeats());
+            ps.setDate(4, Date.valueOf(event.getRegistrationDeadline()));
+            ps.setString(5, event.getDescription());
+            ps.setDouble(6, event.getPrice());
+            ps.setInt(7, event.getCategoryId());
+            ps.setInt(8, event.getVenueId());
+            ps.setInt(9, event.getEventId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // ── Complex: Revenue report (used in admin dashboard) ─────────
     public List<Object[]> getRevenueReport() {
         List<Object[]> rows = new ArrayList<>();

@@ -34,7 +34,8 @@ public class AdminDashboardController implements Initializable {
     @FXML private TextField priceField;
     @FXML private ComboBox<String> categoryCombo;
     @FXML private ComboBox<String> venueCombo;
-    @FXML private ComboBox<String> statusCombo;
+    @FXML private Label formTitleLabel;
+    @FXML private Button actionButton;
 
     private User currentUser;
     private final EventDAO eventDAO = new EventDAO();
@@ -43,10 +44,6 @@ public class AdminDashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if (statusCombo != null) {
-            statusCombo.setItems(javafx.collections.FXCollections.observableArrayList("upcoming", "ongoing", "completed", "cancelled"));
-            statusCombo.setValue("upcoming");
-        }
         refreshUI();
     }
 
@@ -57,61 +54,164 @@ public class AdminDashboardController implements Initializable {
 
     private void refreshUI() {
         loadEvents();
+        loadAllRegistrations();
+        loadRevenueReport();
         loadDashboardStats();
-        loadCategoryCombo();
-        loadVenueCombo();
+    }
+
+    private void updateEventStatusesAutomatically() {
+        List<Event> allEvents = eventDAO.getAllUpcomingEvents();
+        java.time.LocalDate today = java.time.LocalDate.now();
+
+        for (Event event : allEvents) {
+            String currentStatus = event.getStatus();
+            String newStatus = null;
+
+            if ("upcoming".equals(currentStatus)) {
+                if (event.getEventDate().isBefore(today)) {
+                    // Event date is in the past
+                    newStatus = "completed";
+                } else if (event.getEventDate().equals(today)) {
+                    // Event is today
+                    newStatus = "ongoing";
+                }
+            } else if ("ongoing".equals(currentStatus) && event.getEventDate().isBefore(today)) {
+                // Ongoing event that has passed should be completed
+                newStatus = "completed";
+            }
+
+            if (newStatus != null && !newStatus.equals(currentStatus)) {
+                eventDAO.updateEventStatus(event.getEventId(), newStatus);
+                System.out.println("Auto-updated event '" + event.getEventName() + "' status from '" + currentStatus + "' to '" + newStatus + "'");
+            }
+        }
     }
 
     private void loadEvents() {
         if (adminEventsFlow == null) {
             return;  // Events pane not available in current scene
         }
+
+        // Auto-update event statuses based on dates
+        updateEventStatusesAutomatically();
+
         List<Event> events = eventDAO.getAllUpcomingEvents();
         adminEventsFlow.getChildren().clear();
 
         for (Event event : events) {
-            VBox card = new VBox(8);
-            card.setPadding(new Insets(12));
+            VBox card = new VBox(10);
+            card.setPadding(new Insets(16));
             card.setAlignment(Pos.TOP_LEFT);
             card.getStyleClass().add("event-card");
+            card.setPrefWidth(350);
+            card.setMinWidth(320);
 
             Label name = new Label(event.getEventName());
             name.getStyleClass().add("card-title");
-            Label info = new Label("Date: " + event.getEventDate() + " | Category: " + event.getCategoryName());
-            info.getStyleClass().add("card-meta");
+            name.setWrapText(true);
+
+            // Create organized info layout
+            GridPane infoGrid = new GridPane();
+            infoGrid.setHgap(10);
+            infoGrid.setVgap(6);
+
+            Label dateLabel = new Label("📅 Date:");
+            dateLabel.getStyleClass().add("info-label");
+            Label dateValue = new Label(event.getEventDate().toString());
+            dateValue.getStyleClass().add("card-meta");
+
+            Label categoryLabel = new Label("🏷️ Category:");
+            categoryLabel.getStyleClass().add("info-label");
+            Label categoryValue = new Label(event.getCategoryName());
+            categoryValue.getStyleClass().add("card-meta");
+
+            Label venueLabel = new Label("📍 Venue:");
+            venueLabel.getStyleClass().add("info-label");
+            Label venueValue = new Label(event.getVenueName() + " (" + event.getVenueLocation() + ")");
+            venueValue.getStyleClass().add("card-meta");
+            venueValue.setWrapText(true);
+
+            Label seatsLabel = new Label("👥 Seats:");
+            seatsLabel.getStyleClass().add("info-label");
+            Label seatsValue = new Label(event.getAvailableSeats() + "/" + event.getTotalSeats());
+            seatsValue.getStyleClass().add("card-meta");
+
+            Label priceLabel = new Label("💰 Price:");
+            priceLabel.getStyleClass().add("info-label");
+            Label priceValue = new Label("₹" + String.format("%.2f", event.getPrice()));
+            priceValue.getStyleClass().add("card-meta");
+
+            // Add labels to grid
+            infoGrid.add(dateLabel, 0, 0);
+            infoGrid.add(dateValue, 1, 0);
+            infoGrid.add(categoryLabel, 0, 1);
+            infoGrid.add(categoryValue, 1, 1);
+            infoGrid.add(venueLabel, 0, 2);
+            infoGrid.add(venueValue, 1, 2);
+            infoGrid.add(seatsLabel, 0, 3);
+            infoGrid.add(seatsValue, 1, 3);
+            infoGrid.add(priceLabel, 0, 4);
+            infoGrid.add(priceValue, 1, 4);
+
+            // Add description if available
+            VBox descriptionBox = null;
+            if (event.getDescription() != null && !event.getDescription().trim().isEmpty()) {
+                descriptionBox = new VBox(4);
+                Label descTitle = new Label("📝 Description:");
+                descTitle.getStyleClass().add("info-label");
+                Label descContent = new Label(event.getDescription());
+                descContent.getStyleClass().add("card-meta");
+                descContent.setWrapText(true);
+                descContent.setMaxWidth(300);
+                descriptionBox.getChildren().addAll(descTitle, descContent);
+            }
+
             Label status = new Label("Status: " + event.getStatus());
             status.getStyleClass().add("status-label");
 
-            String selectedStatus = "upcoming";
-            boolean canUpdateStatus = false;
-            if (statusCombo != null && statusCombo.getValue() != null && !statusCombo.getValue().isEmpty()) {
-                selectedStatus = statusCombo.getValue();
-                canUpdateStatus = true;
-            }
+            HBox buttonContainer = new HBox(10);
+            buttonContainer.setAlignment(Pos.CENTER_LEFT);
+            buttonContainer.setPadding(new Insets(8, 0, 0, 0));
 
-            Button action = new Button("Set status: " + selectedStatus);
-            action.getStyleClass().add("btn-secondary");
-            action.setDisable(!canUpdateStatus);
+            Button cancelBtn = new Button("Cancel Event");
+            cancelBtn.getStyleClass().add("btn-danger");
 
-            action.setOnAction(ev -> {
-                if (statusCombo == null || statusCombo.getValue() == null || statusCombo.getValue().isEmpty()) {
-                    showStatus("Please select a valid status first.", false);
-                    return;
-                }
+            Button editBtn = new Button("Edit Event");
+            editBtn.getStyleClass().add("btn-primary-modern");
 
-                if (eventDAO.updateEventStatus(event.getEventId(), statusCombo.getValue())) {
-                    showStatus("Status updated.", true);
+            cancelBtn.setOnAction(ev -> {
+                if (eventDAO.updateEventStatus(event.getEventId(), "cancelled")) {
+                    showStatus("Event cancelled.", true);
                     refreshUI();
                 } else {
-                    showStatus("Failed to update status.", false);
+                    showStatus("Failed to cancel event.", false);
                 }
             });
 
-            if (canUpdateStatus) {
-                card.getChildren().addAll(name, info, status, action);
+            editBtn.setOnAction(ev -> {
+                try {
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/AdminCreateEvent.fxml"));
+                    javafx.scene.Parent root = loader.load();
+                    AdminDashboardController controller = loader.getController();
+                    controller.setUser(currentUser);
+                    controller.populateEditForm(event); // Pass the event to edit
+                    Stage stage = (Stage) adminEventsFlow.getScene().getWindow();
+                    SceneManager.loadScene(stage, root, "Edit Event", 1100, 700);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showStatus("Navigation error: " + ex.getMessage(), false);
+                }
+            });
+
+            buttonContainer.getChildren().addAll(cancelBtn, editBtn);
+
+            // Build the card content
+            if (descriptionBox != null) {
+                card.getChildren().addAll(name, infoGrid, descriptionBox, status, buttonContainer);
             } else {
-                card.getChildren().addAll(name, info, status);
+                card.getChildren().addAll(name, infoGrid, status, buttonContainer);
             }
+
             adminEventsFlow.getChildren().add(card);
         }
     }
@@ -192,6 +292,30 @@ public class AdminDashboardController implements Initializable {
         venueCombo.setItems(javafx.collections.FXCollections.observableArrayList(eventDAO.getAllVenues()));
     }
 
+    private Event editingEvent = null; // Track if we're editing an event
+
+    private void populateEditForm(Event event) {
+        editingEvent = event;
+        eventNameField.setText(event.getEventName());
+        descField.setText(event.getDescription());
+        eventDatePicker.setValue(event.getEventDate());
+        deadlinePicker.setValue(event.getRegistrationDeadline());
+        totalSeatsField.setText(String.valueOf(event.getTotalSeats()));
+        priceField.setText(String.format("%.2f", event.getPrice()));
+        categoryCombo.setValue(event.getCategoryName());
+        venueCombo.setValue(event.getVenueName());
+
+        // Update UI for editing mode
+        if (formTitleLabel != null) {
+            formTitleLabel.setText("Edit Event");
+        }
+        if (actionButton != null) {
+            actionButton.setText("Update Event");
+        }
+
+        showStatus("Editing event: " + event.getEventName(), true);
+    }
+
     @FXML
     private void handleAddEvent(ActionEvent e) {
         try {
@@ -214,15 +338,30 @@ public class AdminDashboardController implements Initializable {
             ev.setCategoryId(eventDAO.getCategoryIdByName(categoryCombo.getValue()));
             ev.setVenueId(eventDAO.getVenueIdByName(venueCombo.getValue()));
 
-            if (eventDAO.addEvent(ev)) {
-                showStatus("Event created successfully.", true);
+            boolean success;
+            String action;
+
+            if (editingEvent != null) {
+                // Update existing event
+                ev.setEventId(editingEvent.getEventId());
+                success = eventDAO.updateEvent(ev);
+                action = "updated";
+            } else {
+                // Create new event
+                success = eventDAO.addEvent(ev);
+                action = "created";
+            }
+
+            if (success) {
+                showStatus("Event " + action + " successfully.", true);
                 clearEventForm();
+                editingEvent = null; // Reset editing state
                 refreshUI();
             } else {
-                showStatus("Failed to create event.", false);
+                showStatus("Failed to " + action + " event.", false);
             }
         } catch (Exception ex) {
-            showStatus("Error creating event: " + ex.getMessage(), false);
+            showStatus("Error " + (editingEvent != null ? "updating" : "creating") + " event: " + ex.getMessage(), false);
         }
     }
 
@@ -230,6 +369,15 @@ public class AdminDashboardController implements Initializable {
         eventNameField.clear(); descField.clear(); totalSeatsField.clear(); priceField.clear();
         eventDatePicker.setValue(null); deadlinePicker.setValue(null);
         categoryCombo.setValue(null); venueCombo.setValue(null);
+        editingEvent = null; // Reset editing state
+
+        // Reset UI to create mode
+        if (formTitleLabel != null) {
+            formTitleLabel.setText("Create New Event");
+        }
+        if (actionButton != null) {
+            actionButton.setText("Create Event");
+        }
     }
 
     @FXML

@@ -60,30 +60,82 @@ public class UserDashboardController implements Initializable {
     }
 
     private VBox buildEventCard(Event event) {
-        VBox card = new VBox(8);
-        card.setPadding(new Insets(12));
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(16));
         card.setAlignment(Pos.TOP_LEFT);
         card.getStyleClass().add("event-card");
+        card.setPrefWidth(300);
+        card.setMinWidth(280);
 
         Label labelName = new Label(event.getEventName());
         labelName.getStyleClass().add("card-title");
+        labelName.setWrapText(true);
 
-        Label labelInfo = new Label("Date: " + event.getEventDate() + " | Category: " + event.getCategoryName());
-        labelInfo.getStyleClass().add("card-meta");
+        // Create a more organized layout with GridPane for better spacing
+        GridPane infoGrid = new GridPane();
+        infoGrid.setHgap(10);
+        infoGrid.setVgap(6);
 
-        Label labelVenue = new Label("Venue: " + event.getVenueName());
-        labelVenue.getStyleClass().add("card-meta");
+        Label dateLabel = new Label("📅 Date:");
+        dateLabel.getStyleClass().add("info-label");
+        Label dateValue = new Label(event.getEventDate().toString());
+        dateValue.getStyleClass().add("card-meta");
 
-        Label labelSeats = new Label("Seats: " + event.getAvailableSeats() + "/" + event.getTotalSeats());
-        labelSeats.getStyleClass().add("card-meta");
+        Label categoryLabel = new Label("🏷️ Category:");
+        categoryLabel.getStyleClass().add("info-label");
+        Label categoryValue = new Label(event.getCategoryName());
+        categoryValue.getStyleClass().add("card-meta");
 
-        Label labelPrice = new Label("Price: ₹" + String.format("%.2f", event.getPrice()));
-        labelPrice.getStyleClass().add("card-meta");
+        Label venueLabel = new Label("📍 Venue:");
+        venueLabel.getStyleClass().add("info-label");
+        Label venueValue = new Label(event.getVenueName());
+        venueValue.getStyleClass().add("card-meta");
+        venueValue.setWrapText(true);
+
+        Label seatsLabel = new Label("👥 Seats:");
+        seatsLabel.getStyleClass().add("info-label");
+        Label seatsValue = new Label(event.getAvailableSeats() + "/" + event.getTotalSeats());
+        seatsValue.getStyleClass().add("card-meta");
+
+        Label priceLabel = new Label("💰 Price:");
+        priceLabel.getStyleClass().add("info-label");
+        Label priceValue = new Label("₹" + String.format("%.2f", event.getPrice()));
+        priceValue.getStyleClass().add("card-meta");
+
+        // Add labels to grid
+        infoGrid.add(dateLabel, 0, 0);
+        infoGrid.add(dateValue, 1, 0);
+        infoGrid.add(categoryLabel, 0, 1);
+        infoGrid.add(categoryValue, 1, 1);
+        infoGrid.add(venueLabel, 0, 2);
+        infoGrid.add(venueValue, 1, 2);
+        infoGrid.add(seatsLabel, 0, 3);
+        infoGrid.add(seatsValue, 1, 3);
+        infoGrid.add(priceLabel, 0, 4);
+        infoGrid.add(priceValue, 1, 4);
+
+        // Add description if available
+        VBox descriptionBox = null;
+        if (event.getDescription() != null && !event.getDescription().trim().isEmpty()) {
+            descriptionBox = new VBox(4);
+            Label descTitle = new Label("📝 Description:");
+            descTitle.getStyleClass().add("info-label");
+            Label descContent = new Label(event.getDescription());
+            descContent.getStyleClass().add("card-meta");
+            descContent.setWrapText(true);
+            descContent.setMaxWidth(250);
+            descriptionBox.getChildren().addAll(descTitle, descContent);
+        }
 
         Label labelStatus = new Label("Status: " + event.getStatus());
         labelStatus.getStyleClass().add("status-label");
 
-        card.getChildren().addAll(labelName, labelInfo, labelVenue, labelSeats, labelPrice, labelStatus);
+        // Build the card content
+        if (descriptionBox != null) {
+            card.getChildren().addAll(labelName, infoGrid, descriptionBox, labelStatus);
+        } else {
+            card.getChildren().addAll(labelName, infoGrid, labelStatus);
+        }
 
         card.setOnMouseClicked(e -> {
             selectedEvent = event;
