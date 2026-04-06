@@ -43,10 +43,21 @@ CREATE TABLE IF NOT EXISTS EVENTS (
     price                 DECIMAL(8,2) DEFAULT 0.00,
     category_id           INT NOT NULL,
     venue_id              INT NOT NULL,
-    CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES EVENT_CATEGORY(category_id),
-    CONSTRAINT fk_event_venue    FOREIGN KEY (venue_id)    REFERENCES VENUE(venue_id),
-    CONSTRAINT chk_seats         CHECK (available_seats <= total_seats AND available_seats >= 0),
-    CONSTRAINT chk_deadline      CHECK (registration_deadline <= event_date),
+
+    CONSTRAINT fk_event_category
+        FOREIGN KEY (category_id)
+        REFERENCES EVENT_CATEGORY(category_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_event_venue
+        FOREIGN KEY (venue_id)
+        REFERENCES VENUE(venue_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_seats CHECK (available_seats <= total_seats AND available_seats >= 0),
+    CONSTRAINT chk_deadline CHECK (registration_deadline <= event_date),
     CONSTRAINT chk_price CHECK (price >= 0)
 );
 
@@ -56,8 +67,19 @@ CREATE TABLE IF NOT EXISTS REGISTRATIONS (
     event_id          INT NOT NULL,
     registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status            ENUM('pending','confirmed','cancelled','waitlisted') NOT NULL DEFAULT 'pending',
-    CONSTRAINT fk_reg_user  FOREIGN KEY (user_id)  REFERENCES USERS(user_id),
-    CONSTRAINT fk_reg_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id),
+
+    CONSTRAINT fk_reg_user
+        FOREIGN KEY (user_id)
+        REFERENCES USERS(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_reg_event
+        FOREIGN KEY (event_id)
+        REFERENCES EVENTS(event_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
     CONSTRAINT uq_user_event UNIQUE (user_id, event_id)
 );
 
@@ -69,8 +91,18 @@ CREATE TABLE IF NOT EXISTS PAYMENTS (
     payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status       ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
     payment_mode ENUM('cash','card','upi','netbanking','free') NOT NULL,
-    CONSTRAINT fk_pay_user  FOREIGN KEY (user_id)  REFERENCES USERS(user_id),
-    CONSTRAINT fk_pay_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id)
+
+    CONSTRAINT fk_pay_user
+        FOREIGN KEY (user_id)
+        REFERENCES USERS(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_pay_event
+        FOREIGN KEY (event_id)
+        REFERENCES EVENTS(event_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS EVENT_SCHEDULE (
@@ -79,9 +111,16 @@ CREATE TABLE IF NOT EXISTS EVENT_SCHEDULE (
     session_name VARCHAR(200) NOT NULL,
     start_time   DATETIME NOT NULL,
     end_time     DATETIME NOT NULL,
-    CONSTRAINT fk_sched_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id),
-    CONSTRAINT chk_time       CHECK (end_time > start_time)
+
+    CONSTRAINT fk_sched_event
+        FOREIGN KEY (event_id)
+        REFERENCES EVENTS(event_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_time CHECK (end_time > start_time)
 );
+
 
 -- ============================================================
 --  AUDIT / LOG TABLE  (used by triggers)

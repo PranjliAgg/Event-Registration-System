@@ -92,30 +92,35 @@ SELECT
     e.event_date,
     c.category_name,
     e.total_seats,
-    (e.total_seats - e.available_seats)                  AS seats_filled,
-    ROUND((e.total_seats - e.available_seats) * 100.0
-          / e.total_seats, 2)                            AS fill_rate_pct,
-    COALESCE(SUM(p.amount), 0)                           AS total_revenue
+    (e.total_seats - e.available_seats) AS seats_filled,
+    ROUND((e.total_seats - e.available_seats)
+          * 100.0 / e.total_seats, 2) AS fill_rate_pct,
+    CASE 
+        WHEN SUM(p.amount) IS NULL THEN 0
+        ELSE SUM(p.amount)
+    END AS total_revenue
 FROM EVENTS e
-JOIN EVENT_CATEGORY c ON e.category_id = c.category_id
-LEFT JOIN PAYMENTS  p ON e.event_id = p.event_id AND p.status = 'completed'
-GROUP BY e.event_id, e.event_name, e.event_date, c.category_name,
-         e.total_seats, e.available_seats
+JOIN EVENT_CATEGORY c 
+    ON e.category_id = c.category_id
+LEFT JOIN PAYMENTS p 
+    ON e.event_id = p.event_id 
+    AND p.status = 'completed'
+GROUP BY 
+    e.event_id, e.event_name, e.event_date, c.category_name,
+    e.total_seats, e.available_seats
 ORDER BY total_revenue DESC;
 
--- B2: Top 3 most registered events using window function
-SELECT event_name, total_registrations, reg_rank
-FROM (
-    SELECT
-        e.event_name,
-        COUNT(r.reg_id)                              AS total_registrations,
-        DENSE_RANK() OVER (ORDER BY COUNT(r.reg_id) DESC) AS reg_rank
-    FROM EVENTS e
-    LEFT JOIN REGISTRATIONS r ON e.event_id = r.event_id
-      AND r.status = 'confirmed'
-    GROUP BY e.event_id, e.event_name
-) ranked
-WHERE reg_rank <= 3;
+-- B2: Top 3 most registered events
+SELECT
+    e.event_name,
+    COUNT(r.reg_id) AS total_registrations
+FROM EVENTS e
+LEFT JOIN REGISTRATIONS r 
+    ON e.event_id = r.event_id
+    AND r.status = 'confirmed'
+GROUP BY e.event_id, e.event_name
+ORDER BY total_registrations DESC
+LIMIT 3;
 
 -- B3: Users who registered for more than one event
 SELECT u.user_id, u.name, u.email, COUNT(r.event_id) AS event_count
@@ -142,15 +147,14 @@ HAVING actual_registrations >= v.capacity;
 -- B5: Category-wise registration summary with running total
 SELECT
     c.category_name,
-    COUNT(DISTINCT e.event_id)  AS events_held,
-    COUNT(r.reg_id)             AS total_registrations,
-    SUM(COUNT(r.reg_id)) OVER (
-        ORDER BY COUNT(r.reg_id) DESC
-        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-    )                           AS running_total
+    COUNT(DISTINCT e.event_id) AS events_held,
+    COUNT(r.reg_id) AS total_registrations
 FROM EVENT_CATEGORY c
-LEFT JOIN EVENTS        e ON c.category_id = e.category_id
-LEFT JOIN REGISTRATIONS r ON e.event_id    = r.event_id AND r.status = 'confirmed'
+LEFT JOIN EVENTS e 
+    ON c.category_id = e.category_id
+LEFT JOIN REGISTRATIONS r 
+    ON e.event_id = r.event_id
+    AND r.status = 'confirmed'
 GROUP BY c.category_id, c.category_name
 ORDER BY total_registrations DESC;
 

@@ -92,9 +92,24 @@ public class DatabaseInitializer {
 
     private static void createTables(Statement stmt) throws SQLException {
         String[] tableSQL = {
-            "CREATE TABLE IF NOT EXISTS EVENT_CATEGORY (category_id INT AUTO_INCREMENT PRIMARY KEY, category_name VARCHAR(100) NOT NULL UNIQUE)",
-            "CREATE TABLE IF NOT EXISTS VENUE (venue_id INT AUTO_INCREMENT PRIMARY KEY, venue_name VARCHAR(150) NOT NULL, location VARCHAR(255) NOT NULL, capacity INT NOT NULL CHECK (capacity > 0))",
-            "CREATE TABLE IF NOT EXISTS USERS (user_id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(150) NOT NULL UNIQUE, phone VARCHAR(15), password VARCHAR(255) NOT NULL, role ENUM('admin','user') NOT NULL DEFAULT 'user')",
+            "CREATE TABLE IF NOT EXISTS EVENT_CATEGORY (" +
+            "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "category_name VARCHAR(100) NOT NULL UNIQUE)",
+
+            "CREATE TABLE IF NOT EXISTS VENUE (" +
+            "venue_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "venue_name VARCHAR(150) NOT NULL, " +
+            "location VARCHAR(255) NOT NULL, " +
+            "capacity INT NOT NULL CHECK (capacity > 0))",
+
+            "CREATE TABLE IF NOT EXISTS USERS (" +
+            "user_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "name VARCHAR(100) NOT NULL, " +
+            "email VARCHAR(150) NOT NULL UNIQUE, " +
+            "phone VARCHAR(15), " +
+            "password VARCHAR(255) NOT NULL, " +
+            "role ENUM('admin','user') NOT NULL DEFAULT 'user')",
+
             "CREATE TABLE IF NOT EXISTS EVENTS (" +
             "event_id INT AUTO_INCREMENT PRIMARY KEY, " +
             "event_name VARCHAR(200) NOT NULL UNIQUE, " +
@@ -107,15 +122,64 @@ public class DatabaseInitializer {
             "price DECIMAL(8,2) DEFAULT 0.00, " +
             "category_id INT NOT NULL, " +
             "venue_id INT NOT NULL, " +
-            "CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES EVENT_CATEGORY(category_id), " +
-            "CONSTRAINT fk_event_venue FOREIGN KEY (venue_id) REFERENCES VENUE(venue_id), " +
+            "CONSTRAINT fk_event_category FOREIGN KEY (category_id) " +
+            "REFERENCES EVENT_CATEGORY(category_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
+            "CONSTRAINT fk_event_venue FOREIGN KEY (venue_id) " +
+            "REFERENCES VENUE(venue_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
             "CONSTRAINT chk_seats CHECK (available_seats <= total_seats AND available_seats >= 0), " +
             "CONSTRAINT chk_deadline CHECK (registration_deadline <= event_date), " +
             "CONSTRAINT chk_price CHECK (price >= 0))",
-            "CREATE TABLE IF NOT EXISTS REGISTRATIONS (reg_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, event_id INT NOT NULL, registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, status ENUM('pending','confirmed','cancelled','waitlisted') NOT NULL DEFAULT 'pending', CONSTRAINT fk_reg_user FOREIGN KEY (user_id) REFERENCES USERS(user_id), CONSTRAINT fk_reg_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id), CONSTRAINT uq_user_event UNIQUE (user_id, event_id))",
-            "CREATE TABLE IF NOT EXISTS PAYMENTS (payment_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, event_id INT NOT NULL, amount DECIMAL(10,2) NOT NULL CHECK (amount >= 0), payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, status ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending', payment_mode ENUM('cash','card','upi','netbanking','free') NOT NULL, CONSTRAINT fk_pay_user FOREIGN KEY (user_id) REFERENCES USERS(user_id), CONSTRAINT fk_pay_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id))",
-            "CREATE TABLE IF NOT EXISTS EVENT_SCHEDULE (schedule_id INT AUTO_INCREMENT PRIMARY KEY, event_id INT NOT NULL, session_name VARCHAR(200) NOT NULL, start_time DATETIME NOT NULL, end_time DATETIME NOT NULL, CONSTRAINT fk_sched_event FOREIGN KEY (event_id) REFERENCES EVENTS(event_id), CONSTRAINT chk_time CHECK (end_time > start_time))",
-            "CREATE TABLE IF NOT EXISTS AUDIT_LOG (log_id INT AUTO_INCREMENT PRIMARY KEY, action VARCHAR(100) NOT NULL, table_name VARCHAR(100) NOT NULL, record_id INT, details TEXT, changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+
+            "CREATE TABLE IF NOT EXISTS REGISTRATIONS (" +
+            "reg_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "user_id INT NOT NULL, " +
+            "event_id INT NOT NULL, " +
+            "registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+            "status ENUM('pending','confirmed','cancelled','waitlisted') NOT NULL DEFAULT 'pending', " +
+            "CONSTRAINT fk_reg_user FOREIGN KEY (user_id) " +
+            "REFERENCES USERS(user_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
+            "CONSTRAINT fk_reg_event FOREIGN KEY (event_id) " +
+            "REFERENCES EVENTS(event_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
+            "CONSTRAINT uq_user_event UNIQUE (user_id, event_id))",
+
+            "CREATE TABLE IF NOT EXISTS PAYMENTS (" +
+            "payment_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "user_id INT NOT NULL, " +
+            "event_id INT NOT NULL, " +
+            "amount DECIMAL(10,2) NOT NULL CHECK (amount >= 0), " +
+            "payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+            "status ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending', " +
+            "payment_mode ENUM('cash','card','upi','netbanking','free') NOT NULL, " +
+            "CONSTRAINT fk_pay_user FOREIGN KEY (user_id) " +
+            "REFERENCES USERS(user_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
+            "CONSTRAINT fk_pay_event FOREIGN KEY (event_id) " +
+            "REFERENCES EVENTS(event_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE)",
+
+            "CREATE TABLE IF NOT EXISTS EVENT_SCHEDULE (" +
+            "schedule_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "event_id INT NOT NULL, " +
+            "session_name VARCHAR(200) NOT NULL, " +
+            "start_time DATETIME NOT NULL, " +
+            "end_time DATETIME NOT NULL, " +
+            "CONSTRAINT fk_sched_event FOREIGN KEY (event_id) " +
+            "REFERENCES EVENTS(event_id) " +
+            "ON DELETE CASCADE ON UPDATE CASCADE, " +
+            "CONSTRAINT uq_schedule UNIQUE (event_id, session_name, start_time, end_time), " +
+            "CONSTRAINT chk_time CHECK (end_time > start_time))",
+
+            "CREATE TABLE IF NOT EXISTS AUDIT_LOG (" +
+            "log_id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "action VARCHAR(100) NOT NULL, " +
+            "table_name VARCHAR(100) NOT NULL, " +
+            "record_id INT, " +
+            "details TEXT, " +
+            "changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
         };
 
         for (String sql : tableSQL) {
@@ -419,7 +483,7 @@ public class DatabaseInitializer {
     private static void insertSampleData(Statement stmt) throws SQLException {
         // Delete old events first to refresh with new dates
         try {
-            stmt.execute("DELETE FROM EVENTS WHERE event_date < '2026-04-01'");
+            stmt.execute("UPDATE EVENTS SET status = 'completed' WHERE event_date < CURDATE()");
             System.out.println("[DB INIT] Cleaned up old events");
         } catch (SQLException e) {
             System.out.println("[DB INIT] Info: " + e.getMessage());
