@@ -7,7 +7,7 @@ public class DatabaseReset {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/", "root", "root"
+                "jdbc:mysql://localhost:3306/", "root", "pranjli*24"
             );
             
             Statement stmt = conn.createStatement();

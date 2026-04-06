@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS USERS (
     name     VARCHAR(100) NOT NULL,
     email    VARCHAR(150) NOT NULL UNIQUE,
     phone    VARCHAR(15),
-    password VARCHAR(255) NOT NULL,   -- store bcrypt hash in production
+    password VARCHAR(255) NOT NULL,
     role     ENUM('admin','user') NOT NULL DEFAULT 'user'
 );
 
@@ -368,38 +368,51 @@ DELIMITER ;
 
 INSERT INTO EVENT_CATEGORY (category_name) VALUES
 ('Technology'), ('Music'), ('Sports'), ('Arts & Culture'),
-('Business'), ('Health & Wellness'), ('Education');
+('Business'), ('Health & Wellness'), ('Education'), ('Gaming'),
+('Photography'), ('Dance');
 
 INSERT INTO VENUE (venue_name, location, capacity) VALUES
 ('Main Auditorium',      'Block A, Ground Floor', 500),
 ('Seminar Hall 1',       'Block B, First Floor',  100),
 ('Open Air Amphitheatre','College Ground',         1000),
 ('Conference Room 101',  'Admin Block',             50),
-('Sports Complex',       'North Campus',           300);
+('Sports Complex',       'North Campus',           300),
+('Hall A', 'Block C', 150),
+('Hall B', 'Block C', 200),
+('Mini Auditorium', 'Block D', 120),
+('Outdoor Stage', 'Central Lawn', 800);
 
 INSERT INTO USERS (name, email, phone, password, role) VALUES
-('Admin User',    'admin@college.edu',   '9000000001', '$2b$12$admin_hash',   'admin'),
-('Alice Sharma',  'alice@student.edu',   '9000000002', '$2b$12$alice_hash',   'user'),
-('Bob Mehta',     'bob@student.edu',     '9000000003', '$2b$12$bob_hash',     'user'),
-('Carol D''souza','carol@student.edu',   '9000000004', '$2b$12$carol_hash',   'user'),
-('David Kumar',   'david@student.edu',   '9000000005', '$2b$12$david_hash',   'user'),
-('Eva Nair',      'eva@student.edu',     '9000000006', '$2b$12$eva_hash',     'user');
+('Admin User',    'admin@college.edu',   '9000000001', 'admin*123',   'admin'),
+('Alice Sharma',  'alice@student.edu',   '9000000002', 'alice*123',   'user'),
+('Bob Mehta',     'bob@student.edu',     '9000000003', 'bob*123',     'user'),
+('Carol D''souza','carol@student.edu',   '9000000004', 'carol*123',   'user'),
+('David Kumar',   'david@student.edu',   '9000000005', 'david*123',   'user'),
+('Eva Nair',      'eva@student.edu',     '9000000006', 'eva*123',     'user');
 
 INSERT INTO EVENTS
 (event_name, event_date, total_seats, available_seats,
  registration_deadline, status, description, category_id, venue_id) VALUES
-('Annual Tech Fest 2025',  '2026-11-15', 500, 500, '2026-11-10', 'upcoming',
+('Annual Tech Fest 2025', '2026-11-15', 500, 500, '2026-11-10', 'upcoming',
  'Flagship technology festival with workshops, hackathon and talks.', 1, 1),
-('Classical Music Night',  '2026-10-20', 200, 200, '2026-10-18', 'upcoming',
+('Classical Music Night', '2026-10-20', 200, 200, '2026-10-18', 'upcoming',
  'An evening of Hindustani classical music performances.', 2, 3),
-('Inter-College Cricket',  '2026-10-05', 300, 300, '2026-10-03', 'upcoming',
+('Inter-College Cricket', '2026-10-05', 300, 300, '2026-10-03', 'upcoming',
  'Annual inter-college cricket tournament.', 3, 5),
-('AI Workshop',            '2026-09-28', 50,  50,  '2026-09-25', 'upcoming',
+('AI Workshop', '2026-09-28', 50, 50, '2026-09-25', 'upcoming',
  'Hands-on workshop on machine learning and AI tools.', 1, 2),
-('Startup Summit',         '2026-11-01', 100, 100, '2026-10-28', 'upcoming',
+('Startup Summit', '2026-11-01', 100, 100, '2026-10-28', 'upcoming',
  'Connect with entrepreneurs, investors, and mentors.', 5, 4),
-('Yoga & Wellness Day',    '2026-10-12', 80,  80,  '2026-10-10', 'upcoming',
- 'Full-day wellness workshop including yoga, meditation, and nutrition talks.', 6, 3);
+('Yoga & Wellness Day', '2026-10-12', 80, 80, '2026-10-10', 'upcoming',
+ 'Full-day wellness workshop including yoga, meditation, and nutrition talks.', 6, 3),
+('Gaming Championship', '2026-12-05', 150, 150, '2026-12-01', 'upcoming',
+ 'Inter-college gaming competition', 8, 6),
+('Photography Contest', '2026-11-25', 100, 100, '2026-11-20', 'upcoming',
+ 'Capture the best campus moments', 9, 7),
+('Dance Battle', '2026-10-30', 200, 200, '2026-10-28', 'upcoming',
+ 'Street and freestyle dance competition', 10, 8),
+('Code Sprint', '2026-09-20', 80, 80, '2026-09-18', 'upcoming',
+ 'Competitive coding challenge', 1, 9);
 
 INSERT INTO EVENT_SCHEDULE (event_id, session_name, start_time, end_time) VALUES
 (1, 'Inauguration',         '2026-11-15 09:00:00', '2026-11-15 10:00:00'),

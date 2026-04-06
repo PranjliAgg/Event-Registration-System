@@ -8,7 +8,7 @@ import java.sql.*;
  */
 public class DatabaseConnection {
 
-    private static final String URL      = "jdbc:mysql://localhost:3306/event_registration_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+    private static final String URL      = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String USER     = "root";
     private static final String PASSWORD = "pranjli*24";
 
@@ -21,7 +21,7 @@ public class DatabaseConnection {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("[DB] MySQL Driver loaded successfully");
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("[DB] ✓ Connected to event_registration_db");
+            System.out.println("[DB] ✓ Connected to MySQL");
         } catch (ClassNotFoundException e) {
             System.err.println("[DB] MySQL Driver not found: " + e.getMessage());
             e.printStackTrace();
