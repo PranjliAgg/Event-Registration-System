@@ -40,12 +40,14 @@ CREATE TABLE IF NOT EXISTS EVENTS (
     registration_deadline DATE NOT NULL,
     status                ENUM('upcoming','ongoing','completed','cancelled') NOT NULL DEFAULT 'upcoming',
     description           TEXT,
+    price                 DECIMAL(8,2) DEFAULT 0.00,
     category_id           INT NOT NULL,
     venue_id              INT NOT NULL,
     CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES EVENT_CATEGORY(category_id),
     CONSTRAINT fk_event_venue    FOREIGN KEY (venue_id)    REFERENCES VENUE(venue_id),
     CONSTRAINT chk_seats         CHECK (available_seats <= total_seats AND available_seats >= 0),
-    CONSTRAINT chk_deadline      CHECK (registration_deadline <= event_date)
+    CONSTRAINT chk_deadline      CHECK (registration_deadline <= event_date),
+    CONSTRAINT chk_price CHECK (price >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS REGISTRATIONS (
@@ -392,27 +394,27 @@ INSERT INTO USERS (name, email, phone, password, role) VALUES
 
 INSERT INTO EVENTS
 (event_name, event_date, total_seats, available_seats,
- registration_deadline, status, description, category_id, venue_id) VALUES
+ registration_deadline, status, description, price, category_id, venue_id) VALUES
 ('Annual Tech Fest 2025', '2026-11-15', 500, 500, '2026-11-10', 'upcoming',
- 'Flagship technology festival with workshops, hackathon and talks.', 1, 1),
+ 'Flagship technology festival with workshops, hackathon and talks.', 299.00, 1, 1),
 ('Classical Music Night', '2026-10-20', 200, 200, '2026-10-18', 'upcoming',
- 'An evening of Hindustani classical music performances.', 2, 3),
+ 'An evening of Hindustani classical music performances.', 199.00, 2, 3),
 ('Inter-College Cricket', '2026-10-05', 300, 300, '2026-10-03', 'upcoming',
- 'Annual inter-college cricket tournament.', 3, 5),
+ 'Annual inter-college cricket tournament.', 150.00, 3, 5),
 ('AI Workshop', '2026-09-28', 50, 50, '2026-09-25', 'upcoming',
- 'Hands-on workshop on machine learning and AI tools.', 1, 2),
+ 'Hands-on workshop on machine learning and AI tools.', 499.00, 1, 2),
 ('Startup Summit', '2026-11-01', 100, 100, '2026-10-28', 'upcoming',
- 'Connect with entrepreneurs, investors, and mentors.', 5, 4),
+ 'Connect with entrepreneurs, investors, and mentors.', 399.00, 5, 4),
 ('Yoga & Wellness Day', '2026-10-12', 80, 80, '2026-10-10', 'upcoming',
- 'Full-day wellness workshop including yoga, meditation, and nutrition talks.', 6, 3),
+ 'Full-day wellness workshop including yoga, meditation, and nutrition talks.', 99.00, 6, 3),
 ('Gaming Championship', '2026-12-05', 150, 150, '2026-12-01', 'upcoming',
- 'Inter-college gaming competition', 8, 6),
+ 'Inter-college gaming competition', 250.00, 8, 6),
 ('Photography Contest', '2026-11-25', 100, 100, '2026-11-20', 'upcoming',
- 'Capture the best campus moments', 9, 7),
-('Dance Battle', '2026-10-30', 200, 200, '2026-10-28', 'upcoming',
- 'Street and freestyle dance competition', 10, 8),
+ 'Capture the best campus moments', 120.00, 9, 7),
+('Dance Battle', '2026-10-30', 2, 2, '2026-10-28', 'upcoming',
+ 'Street and freestyle dance competition', 180.00, 10, 8),
 ('Code Sprint', '2026-09-20', 80, 80, '2026-09-18', 'upcoming',
- 'Competitive coding challenge', 1, 9);
+ 'Competitive coding challenge', 220.00, 1, 9);
 
 INSERT INTO EVENT_SCHEDULE (event_id, session_name, start_time, end_time) VALUES
 (1, 'Inauguration',         '2026-11-15 09:00:00', '2026-11-15 10:00:00'),

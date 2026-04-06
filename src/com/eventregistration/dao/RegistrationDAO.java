@@ -28,18 +28,29 @@ public class RegistrationDAO {
             return "ERROR: Database connection failed";
         }
         
-        String sql = "{CALL sp_register_user(?, ?, ?, ?, ?)}";
-        try (CallableStatement cs = connection.prepareCall(sql)) {
-            cs.setInt(1, userId);
-            cs.setInt(2, eventId);
-            cs.setDouble(3, amount);
-            cs.setString(4, payMode);
-            cs.registerOutParameter(5, Types.VARCHAR);
-            System.out.println("[REGISTRATION] Executing stored procedure...");
-            cs.execute();
-            String result = cs.getString(5);
-            System.out.println("[REGISTRATION] Result: " + result);
-            return result;
+        try {
+            // Use MySQL user variable approach instead of OUT parameter
+            String sql = "CALL sp_register_user(?, ?, ?, ?, @result)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, eventId);
+                ps.setDouble(3, amount);
+                ps.setString(4, payMode);
+                
+                System.out.println("[REGISTRATION] Executing stored procedure...");
+                ps.execute();
+                
+                // Retrieve the result from the user variable
+                try (Statement stmt = connection.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT @result as result")) {
+                    if (rs.next()) {
+                        String result = rs.getString("result");
+                        System.out.println("[REGISTRATION] Result: " + result);
+                        return result != null ? result : "ERROR: No result returned";
+                    }
+                }
+            }
+            return "ERROR: No result received";
         } catch (SQLException e) {
             System.err.println("[REGISTRATION] SQL Error: " + e.getMessage());
             e.printStackTrace();
@@ -51,12 +62,28 @@ public class RegistrationDAO {
      * Cancel a registration using stored procedure sp_cancel_registration.
      */
     public String cancelRegistration(int regId) {
-        String sql = "{CALL sp_cancel_registration(?, ?)}";
-        try (CallableStatement cs = conn().prepareCall(sql)) {
-            cs.setInt(1, regId);
-            cs.registerOutParameter(2, Types.VARCHAR);
-            cs.execute();
-            return cs.getString(2);
+        try {
+            Connection connection = conn();
+            if (connection == null) {
+                return "ERROR: Database connection failed";
+            }
+            
+            // Use MySQL user variable approach
+            String sql = "CALL sp_cancel_registration(?, @result)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, regId);
+                ps.execute();
+                
+                // Retrieve the result from the user variable
+                try (Statement stmt = connection.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT @result as result")) {
+                    if (rs.next()) {
+                        String result = rs.getString("result");
+                        return result != null ? result : "ERROR: No result returned";
+                    }
+                }
+            }
+            return "ERROR: No result received";
         } catch (SQLException e) {
             e.printStackTrace();
             return "ERROR: " + e.getMessage();

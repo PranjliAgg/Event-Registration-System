@@ -39,8 +39,8 @@
         <!-- Demo Credentials -->
         <VBox spacing="5" styleClass="demo-section">
             <Label text="Demo Credentials:" styleClass="demo-title"/>
-            <Label text="Admin: admin@college.edu / admin123" styleClass="demo-text"/>
-            <Label text="User: alice@student.edu / password123" styleClass="demo-text"/>
+            <Label text="Admin: admin@college.edu / admin*123" styleClass="demo-text"/>
+            <Label text="User: alice@student.edu / alice*123" styleClass="demo-text"/>
         </VBox>
     </VBox>
 </StackPane>

@@ -29,8 +29,8 @@ public class EventDAO {
         String sql = """
             SELECT e.event_id, e.event_name, e.event_date,
                    e.total_seats, e.available_seats,
-                   e.registration_deadline, e.status, e.description,
-                   e.price, c.category_name, v.venue_name, v.location
+                   e.registration_deadline, e.status, e.description, e.price,
+                   c.category_name, v.venue_name, v.location
             FROM EVENTS e
             JOIN EVENT_CATEGORY c ON e.category_id = c.category_id
             JOIN VENUE          v ON e.venue_id    = v.venue_id
@@ -55,8 +55,8 @@ public class EventDAO {
         String sql = """
             SELECT e.event_id, e.event_name, e.event_date,
                    e.total_seats, e.available_seats,
-                   e.registration_deadline, e.status, e.description,
-                   e.price, c.category_name, v.venue_name, v.location
+                   e.registration_deadline, e.status, e.description, e.price,
+                   c.category_name, v.venue_name, v.location
             FROM EVENTS e
             JOIN EVENT_CATEGORY c ON e.category_id = c.category_id
             JOIN VENUE          v ON e.venue_id    = v.venue_id
@@ -134,8 +134,8 @@ public class EventDAO {
         String sql = """
             SELECT e.event_id, e.event_name, e.event_date,
                    e.total_seats, e.available_seats,
-                   e.registration_deadline, e.status, e.description,
-                   e.price, c.category_name, v.venue_name, v.location
+                   e.registration_deadline, e.status, e.description, e.price,
+                   c.category_name, v.venue_name, v.location
             FROM EVENTS e
             JOIN EVENT_CATEGORY c ON e.category_id = c.category_id
             JOIN VENUE          v ON e.venue_id    = v.venue_id
@@ -285,8 +285,7 @@ public class EventDAO {
         e.setRegistrationDeadline(rs.getDate("registration_deadline").toLocalDate());
         e.setStatus(rs.getString("status"));
         e.setDescription(rs.getString("description"));
-        double price = rs.getDouble("price");
-        e.setPrice(price != 0 ? price : 0);
+        e.setPrice(rs.getDouble("price"));
         e.setCategoryName(rs.getString("category_name"));
         e.setVenueName(rs.getString("venue_name"));
         e.setVenueLocation(rs.getString("location"));
