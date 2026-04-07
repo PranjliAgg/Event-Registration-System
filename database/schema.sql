@@ -154,25 +154,35 @@ BEGIN
 END$$
 
 -- T2: Restore available_seats when a registration is cancelled
-CREATE TRIGGER trg_restore_seats_on_cancel
+CREATE TRIGGER trg_handle_cancellation
 AFTER UPDATE ON REGISTRATIONS
 FOR EACH ROW
 BEGIN
-    IF OLD.status = 'confirmed' AND NEW.status = 'cancelled' THEN
-        UPDATE EVENTS
-        SET available_seats = available_seats + 1
-        WHERE event_id = NEW.event_id;
-    END IF;
+ DECLARE v_reg_id INT;
+ 
+ IF OLD.status = 'confirmed' AND NEW.status = 'cancelled' THEN
+   UPDATE EVENTS
+   SET available_seats = available_seats + 1
+   WHERE event_id = NEW.event_id;
 
-    -- Confirm first waitlisted user when a seat opens
-    IF OLD.status = 'confirmed' AND NEW.status = 'cancelled' THEN
-        UPDATE REGISTRATIONS
-        SET status = 'confirmed'
-        WHERE event_id = NEW.event_id
-          AND status = 'waitlisted'
-        ORDER BY registration_date ASC
-        LIMIT 1;
-    END IF;
+   SELECT reg_id INTO v_reg_id
+   FROM REGISTRATIONS
+   WHERE event_id = NEW.event_id
+     AND status = 'waitlisted'
+   ORDER BY registration_date ASC
+   LIMIT 1;
+
+   IF v_reg_id IS NOT NULL THEN
+     UPDATE REGISTRATIONS
+     SET status = 'confirmed'
+     WHERE reg_id = v_reg_id;
+
+     UPDATE EVENTS
+     SET available_seats = available_seats - 1
+     WHERE event_id = NEW.event_id;
+   END IF;
+
+ END IF;
 END$$
 
 -- T3: Prevent double-booking (extra guard beyond UNIQUE constraint)
