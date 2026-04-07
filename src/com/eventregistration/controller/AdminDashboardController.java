@@ -57,6 +57,8 @@ public class AdminDashboardController implements Initializable {
         loadAllRegistrations();
         loadRevenueReport();
         loadDashboardStats();
+        loadCategoryCombo();
+        loadVenueCombo();
     }
 
     private void updateEventStatusesAutomatically() {

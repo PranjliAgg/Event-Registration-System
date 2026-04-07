@@ -159,7 +159,7 @@ AFTER UPDATE ON REGISTRATIONS
 FOR EACH ROW
 BEGIN
  DECLARE v_reg_id INT;
- 
+
  IF OLD.status = 'confirmed' AND NEW.status = 'cancelled' THEN
    UPDATE EVENTS
    SET available_seats = available_seats + 1
@@ -339,7 +339,7 @@ BEGIN
         e.event_id,
         e.event_name,
         e.event_date,
-        e.total_seats,
+        e.total_seats,  
         e.available_seats,
         (e.total_seats - e.available_seats) AS seats_filled,
         e.status,
