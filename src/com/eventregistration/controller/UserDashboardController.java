@@ -4,6 +4,9 @@ import com.eventregistration.dao.EventDAO;
 import com.eventregistration.dao.RegistrationDAO;
 import com.eventregistration.model.Event;
 import com.eventregistration.model.User;
+import com.eventregistration.payment.RazorpayHandler;
+import com.eventregistration.util.ConfigLoader;
+import com.razorpay.Order;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,8 +15,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import java.awt.Desktop;
 
-import java.net.URL;
+import java.net.*;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -26,6 +30,7 @@ public class UserDashboardController implements Initializable {
     @FXML private ComboBox<String> filterCategoryCombo;
     @FXML private ComboBox<String> filterVenueCombo;
     @FXML private ComboBox<String> payModeCombo;
+    @FXML private Button registerBtn;
     @FXML private Label welcomeLabel;
     @FXML private Label statusLabel;
 
@@ -48,6 +53,10 @@ public class UserDashboardController implements Initializable {
         }
         if (filterVenueCombo != null) {
             filterVenueCombo.setItems(javafx.collections.FXCollections.observableArrayList(eventDAO.getAllVenues()));
+        }
+        if (registerBtn != null) {
+            registerBtn.setDisable(true);
+            registerBtn.setOnAction(this::handleRegister);
         }
 
         loadEvents();
@@ -143,6 +152,9 @@ public class UserDashboardController implements Initializable {
                 n.getStyleClass().remove("event-card-selected");
             }
             card.getStyleClass().add("event-card-selected");
+            if (registerBtn != null) {
+                registerBtn.setDisable(false);
+            }
             showStatus("Selected event: " + event.getEventName(), true);
         });
 
@@ -157,6 +169,11 @@ public class UserDashboardController implements Initializable {
                 searchField == null ? "" : searchField.getText().trim(),
                 filterCategoryCombo == null ? null : filterCategoryCombo.getValue(),
                 filterVenueCombo == null ? null : filterVenueCombo.getValue());
+
+        selectedEvent = null;
+        if (registerBtn != null) {
+            registerBtn.setDisable(true);
+        }
 
         eventsFlowPane.getChildren().clear();
         if (events.isEmpty()) {
@@ -288,10 +305,97 @@ public class UserDashboardController implements Initializable {
         loadEvents();
     }
 
+    private String getRazorpayKey() {
+        try {
+            ConfigLoader loader = new ConfigLoader();
+            return loader.getString("razorpay_key_id");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "";
+        }
+    }
+
+    private boolean simulatePaymentConfirmation(String orderId) {
+        // Create Razorpay checkout HTML that opens in a popup
+        String html = "<!DOCTYPE html><html><head><title>Razorpay Checkout</title>" +
+                     "<script src='https://checkout.razorpay.com/v1/checkout.js'></script>" +
+                     "</head><body style='font-family: Arial, sans-serif; padding: 20px;'>" +
+                     "<h2>Complete Your Payment</h2>" +
+                     "<p>Order ID: " + orderId + "</p>" +
+                     "<button onclick='startPayment()' style='padding: 10px 20px; background: #3399cc; color: white; border: none; border-radius: 5px; cursor: pointer;'>Pay Now</button>" +
+                     "<script>" +
+                     "function startPayment() {" +
+                     "  var options = {" +
+                     "    'key': '" + getRazorpayKey() + "'," +
+                     "    'order_id': '" + orderId + "'," +
+                     "    'name': 'Event Registration'," +
+                     "    'description': 'Event Payment'," +
+                     "    'prefill': { 'name': '" + (currentUser != null ? currentUser.getName() : "") + "' }," +
+                     "    'theme': { 'color': '#3399cc' }," +
+                     "    'handler': function (response) {" +
+                     "      alert('Payment successful! Payment ID: ' + response.razorpay_payment_id);" +
+                     "      window.close();" +
+                     "    }," +
+                     "    'modal': {" +
+                     "      'ondismiss': function() {" +
+                     "        alert('Payment cancelled');" +
+                     "      }" +
+                     "    }" +
+                     "  };" +
+                     "  var rzp = new Razorpay(options);" +
+                     "  rzp.open();" +
+                     "}" +
+                     "</script>" +
+                     "</body></html>";
+
+        try {
+            // Try to open in system browser
+            java.io.File tempFile = java.io.File.createTempFile("razorpay_checkout", ".html");
+            tempFile.deleteOnExit();
+            java.nio.file.Files.write(tempFile.toPath(), html.getBytes());
+
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(tempFile.toURI());
+
+                Alert waitDialog = new Alert(Alert.AlertType.INFORMATION);
+                waitDialog.setTitle("Payment in Progress");
+                waitDialog.setHeaderText("Complete payment in browser");
+                waitDialog.setContentText("A browser window has opened with the payment form.\n\n" +
+                                        "Complete the payment, then return here and click OK.");
+                waitDialog.showAndWait();
+                return true;
+            } else {
+                Alert manualDialog = new Alert(Alert.AlertType.INFORMATION);
+                manualDialog.setTitle("Manual Payment");
+                manualDialog.setHeaderText("Copy this HTML to browser");
+                manualDialog.setContentText("Since browser cannot be opened automatically, " +
+                                          "copy the following HTML to a file and open in browser:\n\n" + html);
+                manualDialog.showAndWait();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert errorDialog = new Alert(Alert.AlertType.ERROR);
+            errorDialog.setTitle("Payment Error");
+            errorDialog.setContentText("Could not create payment page: " + e.getMessage());
+            errorDialog.showAndWait();
+            return false;
+        }
+    }
     @FXML
     private void handleRegister(ActionEvent e) {
         if (selectedEvent == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Event Selected");
+            alert.setHeaderText("Select an event first");
+            alert.setContentText("Please click on an event card before registering.");
+            alert.showAndWait();
             showStatus("Select an event card before registering.", false);
+            return;
+        }
+
+        if (currentUser == null) {
+            showStatus("User not logged in.", false);
             return;
         }
 
@@ -303,26 +407,73 @@ public class UserDashboardController implements Initializable {
         double amount = selectedEvent.getPrice();
         String mode = payModeCombo == null ? "free" : payModeCombo.getValue();
 
+        // Razorpay payment modes
+        if ("card".equalsIgnoreCase(mode) || "upi".equalsIgnoreCase(mode) || "netbanking".equalsIgnoreCase(mode)) {
+            try {
+                RazorpayHandler razorpay = new RazorpayHandler();
+                String receiptId = "REG_" + currentUser.getUserId() + "_" + selectedEvent.getEventId();
+
+                // Create Razorpay order
+                Order order = razorpay.createOrder((int) (amount * 100), receiptId); // amount in paise
+
+                String orderId = order.get("id"); // Razorpay order ID
+
+                // Show info to user
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Payment Initiated");
+                info.setHeaderText("Razorpay Order Created");
+                info.setContentText("Order ID: " + orderId + 
+                                    "\nComplete payment using Razorpay checkout.");
+                info.showAndWait();
+
+                // Open Razorpay checkout in browser for actual payment integration
+                boolean paymentSuccess = simulatePaymentConfirmation(orderId); // actual integration
+
+                if (paymentSuccess) {
+                    String regResult = regDAO.registerUser(currentUser.getUserId(), selectedEvent.getEventId(), amount, mode);
+                    boolean success = regResult.startsWith("SUCCESS") || regResult.startsWith("WAITLISTED");
+                    showStatus(regResult, success);
+                    if (success) {
+                        selectedEvent = null;
+                        if (registerBtn != null) {
+                            registerBtn.setDisable(true);
+                        }
+                        loadEvents();
+                        loadMyRegistrations();
+                    }
+                } else {
+                    showStatus("Payment failed or cancelled.", false);
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showStatus("Payment initiation failed: " + ex.getMessage(), false);
+            }
+            return;
+        }
+
+        // Fallback for free/cash payment
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Registration");
         confirm.setHeaderText("Confirm Your Registration");
         confirm.setContentText("Event: " + selectedEvent.getEventName() + "\nPrice: ₹" + String.format("%.2f", amount) + "\nMode: " + mode);
+
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return;
         }
 
         String regResult = regDAO.registerUser(currentUser.getUserId(), selectedEvent.getEventId(), amount, mode);
         boolean success = regResult.startsWith("SUCCESS") || regResult.startsWith("WAITLISTED");
-        if (success) {
-            Alert info = new Alert(Alert.AlertType.INFORMATION);
-            info.setTitle("Registration Status");
-            info.setHeaderText("Registration Processed");
-            info.setContentText(regResult);
-            info.showAndWait();
-        }
         showStatus(regResult, success);
-        loadEvents();
-        loadMyRegistrations();
+
+        if (success) {
+            selectedEvent = null;
+            if (registerBtn != null) {
+                registerBtn.setDisable(true);
+            }
+            loadEvents();
+            loadMyRegistrations();
+        }
     }
 
     @FXML

@@ -33,7 +33,7 @@
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Label text="Payment Mode:" styleClass="form-label"/>
                         <ComboBox fx:id="payModeCombo" prefWidth="120"/>
-                        <Button text="Register Selected" onAction="#handleRegister" styleClass="btn-primary-modern"/>
+                        <Button fx:id="registerBtn" text="Register Selected" onAction="#handleRegister" styleClass="btn-primary-modern"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="My Registrations" onAction="#handleNavMyRegistrations" styleClass="btn-secondary-modern"/>
                     </HBox>
