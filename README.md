@@ -1,159 +1,279 @@
-# Event Registration & Allocation System
-### DBMS College Project — MySQL + JavaFX
+# Event Registration System
 
----
+A comprehensive JavaFX application for event registration with integrated Razorpay payment processing, built as a DBMS college project using MySQL database.
 
-## Project Structure
+## 🚀 Features
+
+### User Portal
+- **Event Browsing**: Browse and search upcoming events by category, date, and venue
+- **Smart Registration**: Automatic seat management with waitlist functionality
+- **Payment Integration**: Secure Razorpay payment processing with browser-based checkout
+- **Registration Management**: View and cancel personal registrations
+- **Real-time Updates**: Live seat availability and registration status
+
+### Admin Portal
+- **Event Management**: Create and manage events with detailed scheduling
+- **Registration Oversight**: View all registrations across the system
+- **Revenue Analytics**: Comprehensive revenue reports with fill rate analysis
+- **System Monitoring**: Track event performance and user engagement
+
+### Database Features
+- **Advanced Triggers**: 7 automated triggers for seat management and audit logging
+- **Stored Procedures**: 5 optimized procedures for complex operations
+- **Query Optimization**: 24 queries covering basic to advanced SQL concepts
+- **Transaction Safety**: ACID-compliant operations with rollback support
+
+## 🛠️ Technology Stack
+
+- **Frontend**: JavaFX 17+ with FXML and CSS styling
+- **Backend**: Java 17+ with JDBC connectivity
+- **Database**: MySQL 8.0+ with stored procedures and triggers
+- **Payment**: Razorpay Java SDK with browser-based checkout
+- **Build Tool**: Maven/Gradle compatible
+
+## 📁 Project Structure
 
 ```
 EventRegistration/
 ├── database/
-│   ├── schema.sql          ← Tables, Triggers, Procedures, Sample Data
-│   └── queries.sql         ← Basic (A1–A12) & Complex Queries (B1–B12)
-│
-└── src/
-    ├── com/eventregistration/
-    │   ├── MainApp.java                        ← JavaFX entry point
-    │   ├── db/
-    │   │   └── DatabaseConnection.java         ← Singleton JDBC connector
-    │   ├── model/
-    │   │   ├── Event.java
-    │   │   └── User.java
-    │   ├── dao/
-    │   │   ├── EventDAO.java                   ← Queries + SP calls
-    │   │   ├── RegistrationDAO.java            ← SP: register, cancel
-    │   │   └── UserDAO.java                    ← Login, register user
-    │   └── controller/
-    │       ├── LoginController.java
-    │       ├── UserDashboardController.java
-    │       └── AdminDashboardController.java
-    └── resources/
-        ├── fxml/
-        │   ├── Login.fxml
-        │   ├── UserDashboard.fxml
-        │   └── AdminDashboard.fxml
-        └── css/
-            └── style.css
+│   ├── schema.sql          # Database schema, triggers, procedures, sample data
+│   └── queries.sql         # Basic & Complex queries
+├── lib/                    # External JAR dependencies
+├── src/
+│   ├── com/eventregistration/
+│   │   ├── MainApp.java                    # JavaFX application entry point
+│   │   ├── controller/
+│   │   │   ├── LoginController.java        # Authentication logic
+│   │   │   ├── UserDashboardController.java # User dashboard & payment
+│   │   │   ├── AdminDashboardController.java # Admin management
+│   │   │   ├── RegisterController.java     # User registration
+│   │   │   └── SceneManager.java           # UI navigation
+│   │   ├── dao/
+│   │   │   ├── UserDAO.java               # User data operations
+│   │   │   ├── EventDAO.java              # Event data operations
+│   │   │   └── RegistrationDAO.java       # Registration management
+│   │   ├── db/
+│   │   │   ├── DatabaseConnection.java    # JDBC connection management
+│   │   │   └── DatabaseInitializer.java   # Database setup
+│   │   ├── model/
+│   │   │   ├── User.java                  # User entity
+│   │   │   └── Event.java                 # Event entity
+│   │   └── payment/
+│   │       └── RazorpayHandler.java       # Payment processing
+│   ├── fxml/                              # UI layouts
+│   └── css/
+│       └── style.css                      # Application styling
+└── README.md
 ```
 
----
+## ⚙️ Installation & Setup
 
-## Setup Instructions
+### Prerequisites
+- Java 17 or higher
+- MySQL 8.0 or higher
+- JavaFX 17+ SDK
+- Maven or Gradle (recommended)
 
 ### Step 1: Database Setup
-1. Open MySQL Workbench or terminal.
-2. Run `database/schema.sql` to create the database, all tables, triggers, procedures, and sample data.
-
-```sql
-source /path/to/database/schema.sql;
+1. Install MySQL and create a database user
+2. Run the database schema:
+```bash
+mysql -u root -p < database/schema.sql
 ```
 
-3. Verify with:
+3. Verify installation:
 ```sql
 USE event_registration_db;
 SHOW TABLES;
-SELECT * FROM EVENTS;
+SELECT * FROM events;
 ```
 
-### Step 2: Update DB Credentials
-Open `src/com/eventregistration/db/DatabaseConnection.java` and update:
+### Step 2: Dependencies
+Download and place the following JARs in the `lib/` directory:
+
+**Required JARs:**
+- `mysql-connector-j-8.x.x.jar` (MySQL Connector/J)
+- `javafx-controls.jar`, `javafx-fxml.jar`, `javafx-graphics.jar` (JavaFX)
+- `razorpay-java-1.x.x.jar` (Razorpay SDK)
+- `okhttp-4.x.x.jar` (HTTP client for Razorpay)
+- `commons-text-1.x.x.jar` (String utilities)
+- `gson-2.x.x.jar` (JSON processing)
+
+### Step 3: Configuration
+1. **Database Credentials**: Update `DatabaseConnection.java`:
 ```java
-private static final String USER     = "root";      // your MySQL username
-private static final String PASSWORD = "password";  // your MySQL password
+private static final String USER = "your_mysql_user";
+private static final String PASSWORD = "your_mysql_password";
 ```
 
-### Step 3: Add MySQL Connector JAR
-Download **mysql-connector-j-8.x.x.jar** from:
-https://dev.mysql.com/downloads/connector/j/
-
-Add it to your project's classpath/module-path.
-
-### Step 4: Add JavaFX SDK
-Download JavaFX SDK from https://openjfx.io/
-
-In your IDE (IntelliJ / Eclipse):
-- Add JavaFX libraries to the project.
-- Set VM options:
-```
---module-path /path/to/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml
+2. **Razorpay Keys**: Create `config.properties` in project root:
+```properties
+razorpay.key_id=rzp_test_your_key_id
+razorpay.key_secret=your_key_secret
 ```
 
-### Step 5: Run
-Run `MainApp.java` as the main class.
+### Step 4: Build & Run
+1. **Using IDE**:
+   - Add all JARs from `lib/` to classpath
+   - Set VM arguments:
+   ```
+   --module-path /path/to/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml
+   ```
+   - Run `MainApp.java`
 
----
+2. **Using Maven** (recommended):
+   ```xml
+   <!-- Add to pom.xml -->
+   <dependencies>
+       <dependency>
+           <groupId>mysql</groupId>
+           <artifactId>mysql-connector-java</artifactId>
+           <version>8.0.33</version>
+       </dependency>
+       <dependency>
+           <groupId>com.razorpay</groupId>
+           <artifactId>razorpay-java</artifactId>
+           <version>1.4.6</version>
+       </dependency>
+       <!-- Add other dependencies -->
+   </dependencies>
+   ```
 
-## Login Credentials (Sample Data)
+## 🔐 Sample Login Credentials
 
-| Role  | Email                  | Password   |
-|-------|------------------------|------------|
-| Admin | admin@college.edu      | password   |
-| User  | alice@student.edu      | password   |
-| User  | bob@student.edu        | password   |
+| Role  | Email              | Password |
+|-------|--------------------|----------|
+| Admin | admin@college.edu  | password |
+| User  | alice@student.edu  | password |
+| User  | bob@student.edu    | password |
 
-> **Note:** For the demo, passwords are stored as plain text. In production, use BCrypt hashing.
+## 💳 Payment Integration
 
----
+### Razorpay Setup
+1. Sign up at [Razorpay Dashboard](https://dashboard.razorpay.com/)
+2. Get your API Key ID and Secret
+3. Add keys to `config.properties`
+4. Test with Razorpay's test mode
 
-## DBMS Components Covered
+### Payment Flow
+1. User selects event and payment method
+2. System creates Razorpay order via API
+3. Browser opens with secure checkout page
+4. Payment completion updates registration status
+5. Automatic confirmation and seat allocation
 
-### Tables (7)
-`USERS`, `EVENT_CATEGORY`, `VENUE`, `EVENTS`, `REGISTRATIONS`, `PAYMENTS`, `EVENT_SCHEDULE`
-+ `AUDIT_LOG` (trigger support table)
+## 🗄️ Database Schema
+
+### Core Tables
+- `users` - User accounts and profiles
+- `events` - Event details and scheduling
+- `registrations` - User-event relationships
+- `payments` - Payment transactions
+- `venues` - Event locations
+- `event_categories` - Event classification
+- `event_schedule` - Detailed timing
+- `audit_log` - System activity tracking
 
 ### Triggers (7)
-| Trigger | Description |
-|---------|-------------|
-| `trg_decrement_seats` | Reduces available_seats on confirmed registration |
-| `trg_restore_seats_on_cancel` | Restores seat + auto-promotes waitlisted user |
-| `trg_prevent_double_booking` | Blocks duplicate registrations |
-| `trg_auto_waitlist` | Sets status to 'waitlisted' when no seats remain |
-| `trg_deadline_check` | Blocks registration after deadline |
-| `trg_audit_registration` | Logs all new registrations to AUDIT_LOG |
-| `trg_audit_payment` | Logs all payment status changes |
+- Seat management automation
+- Waitlist promotion
+- Duplicate booking prevention
+- Deadline enforcement
+- Audit logging
 
 ### Stored Procedures (5)
-| Procedure | Description |
-|-----------|-------------|
-| `sp_register_user` | Full registration + payment in one transaction |
-| `sp_cancel_registration` | Cancels registration + initiates refund |
-| `sp_event_report` | Complete event statistics |
-| `sp_user_registrations` | User's registration history |
-| `sp_search_events` | Filtered event search |
+- `sp_register_user` - Complete registration flow
+- `sp_cancel_registration` - Cancellation with refund
+- `sp_event_report` - Analytics and reporting
+- `sp_user_registrations` - User history
+- `sp_search_events` - Advanced event search
 
-### Basic Queries (A1–A12)
-Covers: SELECT with JOIN, WHERE, GROUP BY, ORDER BY, COUNT, LIKE, DATE filtering.
+## 📊 Queries Coverage
 
-### Complex Queries (B1–B12)
-Covers: Window functions (RANK, DENSE_RANK, SUM OVER), subqueries, NOT EXISTS, CASE expressions, multi-table JOINs, HAVING, monthly trends, running totals.
+### Basic Queries
+- Simple SELECT operations
+- JOIN operations
+- Filtering and sorting
+- Aggregation functions
 
-### DB Connectivity (JDBC)
-- Singleton pattern for connection management
-- `PreparedStatement` for all queries (SQL injection-safe)
-- `CallableStatement` for all stored procedure calls
-- Transaction management with commit/rollback
+### Complex Queries
+- Window functions (RANK, DENSE_RANK)
+- Advanced subqueries
+- Multi-table JOINs
+- Running totals and analytics
+
+## 🚀 Usage
+
+### For Users
+1. Login with credentials
+2. Browse available events
+3. Select event and register
+4. Complete payment via Razorpay
+5. View registration confirmation
+
+### For Admins
+1. Login as admin
+2. Create new events
+3. Monitor registrations
+4. Generate revenue reports
+
+## 🔧 Development
+
+### Code Style
+- Follow Java naming conventions
+- Use meaningful variable names
+- Add comments for complex logic
+- Handle exceptions appropriately
+
+### Testing
+- Test payment flow with Razorpay test keys
+- Verify database transactions
+- Check UI responsiveness
+- Validate form inputs
+
+## 📝 API Documentation
+
+### RazorpayHandler
+```java
+// Create payment order
+Order order = razorpayHandler.createOrder(amount, currency, receipt);
+
+// Handle payment success
+void handlePaymentSuccess(String paymentId, String orderId);
+```
+
+### DatabaseConnection
+```java
+// Get connection
+Connection conn = DatabaseConnection.getConnection();
+
+// Execute queries safely
+PreparedStatement stmt = conn.prepareStatement(sql);
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
+
+## 📄 License
+
+This project is developed for educational purposes as part of a DBMS college course.
+
+## 🆘 Troubleshooting
+
+### Common Issues
+- **JavaFX not found**: Ensure JavaFX SDK is properly added to module path
+- **Database connection failed**: Verify MySQL credentials and server status
+- **Payment not working**: Check Razorpay API keys and internet connection
+- **Build errors**: Ensure all dependencies are in classpath
+
+### Debug Mode
+Enable debug logging in `DatabaseConnection.java` for detailed error information.
 
 ---
 
-## Features
-
-### User Portal
-- Browse & search upcoming events
-- Register for events (with seat check & auto-waitlist)
-- Select payment mode and amount
-- View personal registration history
-- Cancel registrations (triggers auto-refund)
-
-### Admin Portal
-- Add new events
-- Update event status
-- View all registrations system-wide
-- Revenue report with fill rate analytics
-
----
-
-## Dependencies
-- Java 11+
-- JavaFX 17+
-- MySQL 8.0+
-- mysql-connector-j 8.x
+**Note**: This application demonstrates comprehensive database design, JavaFX UI development, and payment gateway integration suitable for real-world event management systems.
